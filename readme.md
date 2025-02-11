@@ -32,8 +32,6 @@ src/
       └── validators.ts
 ```
 
-Let's modify your main.ts to support this structure:
-
 ```typescript
 import { Hono } from "@hono/hono";
 import { logger } from "./src/middlewares/logger.ts";
@@ -63,7 +61,7 @@ Key aspects of this organization:
 5. **Routes**: Define API endpoints
 6. **Middlewares**: Handle cross-cutting concerns
 
-For your hamburger restaurant, you might want to include these features:
+Features:
 
 - **Customers**:
   - Registration
@@ -79,5 +77,3 @@ For your hamburger restaurant, you might want to include these features:
   - Order creation
   - Status tracking
   - Payment processing
-
-Would you like me to provide an example implementation of any specific part of this structure?
