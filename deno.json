@@ -2,11 +2,16 @@
   "nodeModulesDir": "auto",
   "tasks": {
     "dev": "deno run --watch main.ts",
+    "db:generate": "deno run -A drizzle-kit generate --config=drizzle.config.ts",
     "db:migrate": "deno run -A drizzle-kit generate --config=drizzle.config.ts",
     "db:drop": "deno run -A drizzle-kit drop --config=drizzle.config.ts"
   },
   "imports": {
     "@hono/hono": "jsr:@hono/hono@^4.7.0",
-    "@std/assert": "jsr:@std/assert@^1.0.11"
+    "@std/assert": "jsr:@std/assert@^1.0.11",
+    "@std/dotenv": "jsr:@std/dotenv@^0.225.3",
+    "drizzle-kit": "npm:drizzle-kit@^0.30.4",
+    "drizzle-orm": "npm:drizzle-orm@^0.39.3",
+    "mysql2": "npm:mysql2@^3.12.0"
   }
 }
