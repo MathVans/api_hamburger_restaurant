@@ -1,5 +1,9 @@
 Use Drizzle as ORM
 
+Remember _NEON_
+
+https://www.youtube.com/watch?v=i_mAHOhpBSA&ab_channel=Fireship
+
 ```
 src/
   ├── controllers/
