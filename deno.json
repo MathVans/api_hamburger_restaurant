@@ -1,6 +1,9 @@
 {
+  "nodeModulesDir": "auto",
   "tasks": {
-    "dev": "deno run --watch main.ts"
+    "dev": "deno run --watch main.ts",
+    "db:migrate": "deno run -A drizzle-kit generate --config=drizzle.config.ts",
+    "db:drop": "deno run -A drizzle-kit drop --config=drizzle.config.ts"
   },
   "imports": {
     "@hono/hono": "jsr:@hono/hono@^4.7.0",
