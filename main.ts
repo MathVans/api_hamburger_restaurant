@@ -1,5 +1,6 @@
 import { Hono } from "@hono/hono";
 import { logger } from "./src/middlewares/logger.ts";
+import { db } from "./drizzle/db.ts";
 // import customerRoutes from "./src/routes/customerRoutes.ts";
 // import employeeRoutes from "./src/routes/employeeRoutes.ts";
 // import orderRoutes from "./src/routes/orderRoutes.ts";
