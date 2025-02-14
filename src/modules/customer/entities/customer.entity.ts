@@ -21,6 +21,8 @@ export const CustomerTable = mysqlTable("deno_customers", {
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
 
-// Type for TypeScript inference
 export type Customer = typeof CustomerTable.$inferSelect;
 export type NewCustomer = typeof CustomerTable.$inferInsert;
+export type UpdateCustomer = Partial<
+  Omit<Customer, "id" | "createdAt" | "updatedAt">
+>;

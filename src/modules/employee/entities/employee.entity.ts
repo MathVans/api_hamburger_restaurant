@@ -10,6 +10,3 @@ export const EmployeeTable = mysqlTable("deno_employee", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
-
-export type Employee = typeof EmployeeTable.$inferSelect;
-export type NewEmployee = typeof EmployeeTable.$inferInsert;

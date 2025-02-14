@@ -1,5 +1,5 @@
-import { EmployeeTable } from "./employee.ts";
-import { CustomerTable } from "./customer.ts";
+import { EmployeeTable } from "../../employee/entities/employee.entity.ts";
+import { CustomerTable } from "../../customer/entities/customer.entity.ts";
 import {
   double,
   int,
@@ -30,6 +30,3 @@ export const OrderTable = mysqlTable("deno_order", {
     },
   ),
 });
-
-export type Order = typeof OrderTable.$inferSelect;
-export type NewOrder = typeof OrderTable.$inferInsert;

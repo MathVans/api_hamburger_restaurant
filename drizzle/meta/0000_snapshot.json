@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "4ba32a60-58c8-4872-b5e5-9f13984d847f",
+  "id": "12a6fb40-2f8e-4e0b-8557-de1c738c0216",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "deno_customers": {
