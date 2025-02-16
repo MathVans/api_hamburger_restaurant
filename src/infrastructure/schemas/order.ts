@@ -27,9 +27,9 @@ export const orderRelations = relations(order, ({ many }) => ({
   items: many(orderItem),
 }));
 
-// export type order = typeof order.$inferSelect;
-// export type Neworder = typeof order.$inferInsert;
-// export type Updateorder = Partial<Omit<order, "id">>;
+export type order = typeof order.$inferSelect;
+export type Neworder = typeof order.$inferInsert;
+export type Updateorder = Partial<Omit<order, "id">>;
 
 export const costumerOrder = mysqlTable("deno_customer_order", {
   customerId: int("customer_id").notNull().references(() => customer.id),

@@ -15,10 +15,10 @@ const poolConnection = mysql.createPool({
 export const db = drizzle(poolConnection, {
   mode: "default",
   schema: {
-    customer: Customer,
-    Addresse: Address,
+    customer: customer,
+    Addresse: address,
     role: role,
-    order: OrderTable,
-    orderItem: OrderItemTable,
+    order: order,
+    orderItem: orderItem,
   },
 });

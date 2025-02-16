@@ -10,6 +10,10 @@ export const orderItem = mysqlTable("deno_order_items", {
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
 });
 
+export type orderItem = typeof orderItem.$inferSelect;
+export type newOrderItem = typeof orderItem.$inferInsert;
+export type updateOrderItem = Partial<Omit<orderItem, "id">>;
+
 export const orderItemRelations = relations(orderItem, ({ one }) => ({
   order: one(order, {
     fields: [orderItem.orderId],
