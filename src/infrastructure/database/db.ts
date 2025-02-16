@@ -1,8 +1,10 @@
 import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
-import { CustomerTable } from "../../modules/customer/entities/customer.entity.ts";
-import { EmployeeTable } from "../../modules/employee/entities/employee.entity.ts";
-import { OrderTable } from "../../modules/order/entities/order.entity.ts";
+import { customer } from "../schemas/customer.ts";
+import { address } from "../schemas/address.ts";
+import { role } from "../schemas/role.ts";
+import { order } from "../schemas/order.ts";
+import { orderItem } from "../schemas/orderItem.ts";
 
 // Create the connection pool
 const poolConnection = mysql.createPool({
@@ -13,8 +15,10 @@ const poolConnection = mysql.createPool({
 export const db = drizzle(poolConnection, {
   mode: "default",
   schema: {
-    customers: CustomerTable,
-    employees: EmployeeTable,
-    orders: OrderTable,
+    customer: Customer,
+    Addresse: Address,
+    role: role,
+    order: OrderTable,
+    orderItem: OrderItemTable,
   },
 });
