@@ -30,19 +30,3 @@ export const orderRelations = relations(order, ({ many }) => ({
 export type order = typeof order.$inferSelect;
 export type Neworder = typeof order.$inferInsert;
 export type Updateorder = Partial<Omit<order, "id">>;
-
-export const costumerOrder = mysqlTable("deno_customer_order", {
-  customerId: int("customer_id").notNull().references(() => customer.id),
-  orderId: int("order_id").notNull().references(() => order.id),
-});
-
-export const customerOrderRelations = relations(costumerOrder, ({ one }) => ({
-  customer: one(customer, {
-    fields: [costumerOrder.customerId],
-    references: [customer.id],
-  }),
-  order: one(order, {
-    fields: [costumerOrder.orderId],
-    references: [order.id],
-  }),
-}));

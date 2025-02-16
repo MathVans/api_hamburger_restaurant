@@ -5,6 +5,7 @@ import { address } from "../schemas/address.ts";
 import { role } from "../schemas/role.ts";
 import { order } from "../schemas/order.ts";
 import { orderItem } from "../schemas/orderItem.ts";
+import { customerOrder } from "../schemas/customerOrder.ts";
 
 // Create the connection pool
 const poolConnection = mysql.createPool({
@@ -20,5 +21,6 @@ export const db = drizzle(poolConnection, {
     role: role,
     order: order,
     orderItem: orderItem,
+    customerOrder: customerOrder,
   },
 });
