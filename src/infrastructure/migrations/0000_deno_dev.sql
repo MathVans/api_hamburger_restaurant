@@ -5,6 +5,7 @@ CREATE TABLE `deno_addresses` (
 	`city` varchar(100) NOT NULL,
 	`state` varchar(100) NOT NULL,
 	`zip_code` varchar(20) NOT NULL,
+	`country` varchar(100) NOT NULL,
 	CONSTRAINT `deno_addresses_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
@@ -52,7 +53,7 @@ CREATE TABLE `deno_order_items` (
 --> statement-breakpoint
 CREATE TABLE `deno_roles` (
 	`id` int AUTO_INCREMENT NOT NULL,
-	`name` enum('Admin','User') NOT NULL,
+	`name` enum('VIP','Common') NOT NULL,
 	`created_at` timestamp DEFAULT (now()),
 	`updated_at` timestamp DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
 	CONSTRAINT `deno_roles_id` PRIMARY KEY(`id`)

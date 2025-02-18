@@ -7,11 +7,11 @@ import {
 } from "drizzle-orm/mysql-core";
 
 import { relations } from "drizzle-orm";
-import { order } from "./order.ts";
-import { role } from "./role.ts";
-import { address } from "./address.ts";
+import { orderSchema } from "./order.ts";
+import { roleAddress } from "./role.ts";
+import { addressSchema } from "./address.ts";
 
-export const customer = mysqlTable("deno_customers", {
+export const customerSchema = mysqlTable("deno_customers", {
   id: int("id").primaryKey().autoincrement(),
   firstName: varchar("first_name", { length: 100 }).notNull(),
   middleName: varchar("middle_name", { length: 100 }),
@@ -22,21 +22,23 @@ export const customer = mysqlTable("deno_customers", {
   creditLimit: decimal("credit_limit", { precision: 10, scale: 2 }).default(
     "0.00",
   ),
-  roleId: int("role_id").notNull().references(() => role.id),
+  roleId: int("role_id").notNull().references(() => roleAddress.id),
   createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
   updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow()
     .onUpdateNow(),
 });
 
-export const customerRelations = relations(customer, ({ many, one }) => ({
-  addresses: many(address), // 1 Cliente -> Muitos Endereços
-  orders: many(order), // 1 Cliente -> Muitos Pedidos (M:N)
-  role: one(role, {
-    fields: [customer.roleId],
-    references: [role.id],
+export const customerRelations = relations(customerSchema, ({ many, one }) => ({
+  addresses: many(addressSchema), // 1 Cliente -> Muitos Endereços
+  orders: many(orderSchema), // 1 Cliente -> Muitos Pedidos (M:N)
+  role: one(roleAddress, {
+    fields: [customerSchema.roleId],
+    references: [roleAddress.id],
   }), // 1 Cliente -> Muitos Papéis (1:M)
 }));
 
-export type customer = typeof customer.$inferSelect;
-export type newCustomer = typeof customer.$inferInsert;
-export type updateCustomer = Partial<Omit<customer, "id">>;
+export type customer = typeof customerSchema.$inferSelect;
+export type newCustomer = typeof customerSchema.$inferInsert;
+export type updateCustomer = Partial<
+  Omit<customer, "id" | "createdAt" | "updatedAt">
+>;
