@@ -1,29 +1,29 @@
 import { relations } from "drizzle-orm";
 import { int, mysqlTable } from "drizzle-orm/mysql-core";
-import { customerSchema } from "./customer.ts";
-import { orderSchema } from "./order.ts";
+import { customerTable } from "./customer.ts";
+import { orderTable } from "./order.ts";
 
-export const customerOrderSchema = mysqlTable("deno_customer_order", {
-  customerId: int("customer_id").notNull().references(() => customerSchema.id),
-  orderId: int("order_id").notNull().references(() => orderSchema.id),
+export const customerOrderTable = mysqlTable("deno_customer_order", {
+  customerId: int("customer_id").notNull().references(() => customerTable.id),
+  orderId: int("order_id").notNull().references(() => orderTable.id),
 });
 
 export const customerOrderRelations = relations(
-  customerOrderSchema,
+  customerOrderTable,
   ({ one }) => ({
-    customer: one(customerSchema, {
-      fields: [customerOrderSchema.customerId],
-      references: [customerSchema.id],
+    customer: one(customerTable, {
+      fields: [customerOrderTable.customerId],
+      references: [customerTable.id],
     }),
-    orderSchema: one(orderSchema, {
-      fields: [customerOrderSchema.orderId],
-      references: [orderSchema.id],
+    orderTable: one(orderTable, {
+      fields: [customerOrderTable.orderId],
+      references: [orderTable.id],
     }),
   }),
 );
 
-export type customerOrder = typeof customerOrderSchema.$inferSelect;
-export type newCustomerOrder = typeof customerOrderSchema.$inferInsert;
+export type customerOrder = typeof customerOrderTable.$inferSelect;
+export type newCustomerOrder = typeof customerOrderTable.$inferInsert;
 export type updateCustomerOrder = Partial<
   Omit<customerOrder, "customerId" | "orderId">
 >;

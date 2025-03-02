@@ -1,4 +1,4 @@
-import { orderItemSchema } from "./orderItem.ts";
+import { orderItemTable } from "./orderItem.ts";
 import { relations } from "drizzle-orm";
 import {
   double,
@@ -9,7 +9,7 @@ import {
   varchar,
 } from "drizzle-orm/mysql-core";
 
-export const orderSchema = mysqlTable("deno_order", {
+export const orderTable = mysqlTable("deno_order", {
   id: int("id").primaryKey().autoincrement(),
   price: double("price").notNull(),
   quantity: double("quantity").notNull(),
@@ -22,10 +22,10 @@ export const orderSchema = mysqlTable("deno_order", {
   comments: varchar("comments", { length: 255 }),
 });
 
-export const orderRelations = relations(orderSchema, ({ many }) => ({
-  items: many(orderItemSchema),
+export const orderRelations = relations(orderTable, ({ many }) => ({
+  items: many(orderItemTable),
 }));
 
-export type order = typeof orderSchema.$inferSelect;
-export type Neworder = typeof orderSchema.$inferInsert;
+export type order = typeof orderTable.$inferSelect;
+export type Neworder = typeof orderTable.$inferInsert;
 export type Updateorder = Partial<Omit<order, "id">>;

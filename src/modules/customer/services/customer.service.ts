@@ -30,7 +30,7 @@ export class CustomerService {
 
   async deleteCustomer(id: number): Promise<string | boolean> {
     const result = await this.customerRepository.delete(id);
-    
+
     return;
   }
 

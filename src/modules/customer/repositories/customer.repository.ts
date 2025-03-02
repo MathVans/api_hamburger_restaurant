@@ -1,37 +1,40 @@
 import { eq } from "drizzle-orm";
 import { db } from "../../../infrastructure/database/db.ts";
 import {
-  addressSchema,
-  customerOrderSchema,
-  customerSchema,
-  orderSchema,
+  addressTable,
+  customerOrderTable,
+  customerTable,
+  orderItemTable,
+  orderTable,
 } from "../../../infrastructure/schemas/index.ts";
+
 import type {
   address,
   customer,
   customerOrder,
+  newAddress,
   newCustomer,
   order,
   updateCustomer,
 } from "../../../infrastructure/schemas/index.ts";
-import { MySqlRawQueryResult } from "drizzle-orm/mysql2";
 
 export class CustomerRepository {
+  // CRUD básico para Customers
   async findAll(): Promise<customer[]> {
-    return await db.select().from(customerSchema);
+    return await db.select().from(customerTable);
   }
 
   async findById(id: number): Promise<customer | undefined> {
     const [result] = await db
       .select()
-      .from(customerSchema)
-      .where(eq(customerSchema.id, id));
+      .from(customerTable)
+      .where(eq(customerTable.id, id));
     return result;
   }
 
   async create(data: newCustomer): Promise<customer> {
     const [result] = await db
-      .insert(customerSchema)
+      .insert(customerTable)
       .values(data)
       .returning();
     return result;
@@ -42,85 +45,135 @@ export class CustomerRepository {
     data: updateCustomer,
   ): Promise<customer | undefined> {
     const [result] = await db
-      .update(customerSchema)
+      .update(customerTable)
       .set(data)
-      .where(eq(customerSchema.id, id));
+      .where(eq(customerTable.id, id))
+      .execute();
     return result.affectedRows ? await this.findById(id) : undefined;
   }
 
-  async delete(id: number): Promise<MySqlRawQueryResult> {
+  async delete(id: number): Promise<boolean> {
     const result = await db
-      .delete(customerSchema)
-      .where(eq(customerSchema.id, id))
+      .delete(customerTable)
+      .where(eq(customerTable.id, id))
       .execute();
 
-    return result;
+    return result.affectedRows > 0;
   }
 
-  // Address related operations
+  // Operações relacionadas a endereços
+  async findAddressesByCustomerId(customerId: number): Promise<address[]> {
+    return await db
+      .select()
+      .from(addressTable)
+      .where(eq(addressTable.customerId, customerId));
+  }
+
   async addAddress(
     customerId: number,
-    addressData: Omit<address, "id" | "customerId">,
+    addressData: Omit<newAddress, "customerId">,
   ): Promise<address> {
     const [result] = await db
-      .insert(addressSchema)
+      .insert(addressTable)
       .values({ ...addressData, customerId })
       .returning();
     return result;
   }
 
-  async getCustomerAddresses(customerId: number): Promise<address[]> {
-    return await db
-      .select()
-      .from(addressSchema)
-      .where(eq(addressSchema.customerId, customerId));
+  async deleteAddress(addressId: number): Promise<boolean> {
+    const result = await db
+      .delete(addressTable)
+      .where(eq(addressTable.id, addressId))
+      .execute();
+
+    return result.affectedRows > 0;
   }
 
-  async getCustomerOrders(customerId: number): Promise<order[]> {
+  // Operações relacionadas a pedidos
+  async findOrdersByCustomerId(customerId: number): Promise<order[]> {
     const results = await db
       .select({
-        id: orderSchema.id,
-        price: orderSchema.price,
-        quantity: orderSchema.quantity,
-        orderDate: orderSchema.orderDate,
-        requiredDate: orderSchema.requiredDate,
-        shippedDate: orderSchema.shippedDate,
-        status: orderSchema.status,
-        comments: orderSchema.comments,
+        id: orderTable.id,
+        price: orderTable.price,
+        quantity: orderTable.quantity,
+        orderDate: orderTable.orderDate,
+        requiredDate: orderTable.requiredDate,
+        shippedDate: orderTable.shippedDate,
+        status: orderTable.status,
+        comments: orderTable.comments,
       })
-      .from(customerOrderSchema)
+      .from(customerOrderTable)
       .innerJoin(
-        orderSchema,
-        eq(customerOrderSchema.orderId, orderSchema.id),
+        orderTable,
+        eq(customerOrderTable.orderId, orderTable.id),
       )
-      .where(eq(customerOrderSchema.customerId, customerId));
+      .where(eq(customerOrderTable.customerId, customerId));
 
     return results;
   }
 
-  async addOrderToCustomer(
+  async associateOrderWithCustomer(
     customerId: number,
     orderId: number,
   ): Promise<customerOrder> {
     const [result] = await db
-      .insert(customerOrderSchema)
+      .insert(customerOrderTable)
       .values({ customerId, orderId })
       .returning();
     return result;
   }
 
-  // Complex queries
+  async removeOrderFromCustomer(
+    customerId: number,
+    orderId: number,
+  ): Promise<boolean> {
+    const result = await db
+      .delete(customerOrderTable)
+      .where(eq(customerOrderTable.customerId, customerId))
+      .where(eq(customerOrderTable.orderId, orderId))
+      .execute();
+
+    return result.affectedRows > 0;
+  }
+
+  // Consultas complexas e agregações
   async getCustomerWithAddressesAndOrders(customerId: number) {
     const customer = await this.findById(customerId);
     if (!customer) return undefined;
 
-    const addresses = await this.getCustomerAddresses(customerId);
-    const orders = await this.getCustomerOrders(customerId);
+    const addresses = await this.findAddressesByCustomerId(customerId);
+    const orders = await this.findOrdersByCustomerId(customerId);
 
     return {
       ...customer,
       addresses,
       orders,
     };
+  }
+
+  async getOrderDetailsByCustomerId(customerId: number) {
+    const orderDetails = await db
+      .select({
+        orderId: orderTable.id,
+        orderDate: orderTable.orderDate,
+        status: orderTable.status,
+        itemCount: db.fn.count(orderItemTable.id),
+        totalValue: db.fn.sum(
+          db.sql`${orderItemTable.quantity} * ${orderItemTable.price}`,
+        ),
+      })
+      .from(customerOrderTable)
+      .innerJoin(
+        orderTable,
+        eq(customerOrderTable.orderId, orderTable.id),
+      )
+      .leftJoin(
+        orderItemTable,
+        eq(orderTable.id, orderItemTable.orderId),
+      )
+      .where(eq(customerOrderTable.customerId, customerId))
+      .groupBy(orderTable.id, orderTable.orderDate, orderTable.status);
+
+    return orderDetails;
   }
 }
