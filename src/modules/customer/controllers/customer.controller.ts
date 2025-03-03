@@ -6,7 +6,7 @@ import {
   addressCreateSchema,
   customerCreateSchema,
   customerUpdateSchema,
-} from "../validation/schema.ts";
+} from "../schemas/user.schema.ts";
 
 const customerController = new Hono();
 const customerService = new CustomerService(new CustomerRepository());

@@ -1,0 +1,1 @@
+ALTER TABLE `deno_customers` RENAME COLUMN `hash_password` TO `password`;

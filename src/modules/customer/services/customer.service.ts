@@ -4,7 +4,7 @@ import type {
   customer,
   newCustomer,
   updateCustomer,
-} from "../../../infrastructure/schemas/index.ts";
+} from "../../../infrastructure/models/index.ts";
 
 export class CustomerService {
   constructor(private readonly customerRepository: CustomerRepository) {}

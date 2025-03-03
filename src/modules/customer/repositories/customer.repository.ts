@@ -6,7 +6,7 @@ import {
   customerTable,
   orderItemTable,
   orderTable,
-} from "../../../infrastructure/schemas/index.ts";
+} from "../../../infrastructure/models/index.ts";
 
 import type {
   address,
@@ -16,7 +16,7 @@ import type {
   newCustomer,
   order,
   updateCustomer,
-} from "../../../infrastructure/schemas/index.ts";
+} from "../../../infrastructure/models/index.ts";
 
 export class CustomerRepository {
   // CRUD básico para Customers

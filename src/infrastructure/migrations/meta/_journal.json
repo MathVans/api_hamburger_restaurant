@@ -8,6 +8,20 @@
       "when": 1739898424135,
       "tag": "0000_deno_dev",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1741005301299,
+      "tag": "0001_deno_dev",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1741007720779,
+      "tag": "0002_deno_dev",
+      "breakpoints": true
     }
   ]
 }

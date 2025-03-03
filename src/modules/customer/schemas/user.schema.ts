@@ -7,7 +7,6 @@ const customerBaseSchema = {
   lastName: z.string().min(2).max(100),
   email: z.string().email().max(255),
   phone: z.string().max(20).nullable().optional(),
-  address: z.string().max(255).nullable().optional(),
   creditLimit: z.number().default(0.00).optional(),
   roleId: z.number().int().positive(),
 };

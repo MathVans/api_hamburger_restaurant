@@ -1,13 +1,13 @@
 import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
 import {
-  addressSchema,
-  customerOrderSchema,
-  customerSchema,
-  orderItemSchema,
-  orderSchema,
-  roleAddress,
-} from "../schemas/index.ts";
+  addressTable,
+  customerOrderTable,
+  customerTable,
+  orderItemTable,
+  orderTable,
+  roleTable,
+} from "../models/index.ts";
 
 // Create the connection pool
 const poolConnection = mysql.createPool({
@@ -18,11 +18,11 @@ const poolConnection = mysql.createPool({
 export const db = drizzle(poolConnection, {
   mode: "default",
   schema: {
-    customer: customerSchema,
-    Addresses: addressSchema,
-    role: roleAddress,
-    order: orderSchema,
-    orderItem: orderItemSchema,
-    customerOrder: customerOrderSchema,
+    customer: customerTable,
+    Addresses: addressTable,
+    role: roleTable,
+    order: orderTable,
+    orderItem: orderItemTable,
+    customerOrder: customerOrderTable,
   },
 });
