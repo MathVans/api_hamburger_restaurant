@@ -7,9 +7,8 @@ import {
 } from "drizzle-orm/mysql-core";
 
 import { relations } from "drizzle-orm";
-import { roleTable } from "./role.ts";
-import { addressTable } from "./address.ts";
-import { z } from "zod";
+import { role, roleTable } from "./role.ts";
+import { address, addressTable } from "./address.ts";
 
 export const customerTable = mysqlTable("deno_customers", {
   id: int("id").primaryKey().autoincrement(),
@@ -38,3 +37,8 @@ export type newCustomer = typeof customerTable.$inferInsert;
 export type updateCustomer = Partial<
   Omit<customer, "id" | "createdAt" | "updatedAt">
 >;
+
+export type CustomerResponse = Omit<customer, "password"> & {
+  role?: role;
+  addresses?: address[];
+};

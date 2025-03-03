@@ -1,50 +1,66 @@
-import { Context, Next } from "oak";
+// src/modules/shared/middlewares/validate.ts
+import { Context, MiddlewareHandler, Next } from "hono";
+import { z } from "zod";
 
-export type ValidationSchema = {
-  [key: string]: (value: any) => boolean | string;
-};
-
-export function validate(schema: ValidationSchema) {
-  return async (ctx: Context, next: Next) => {
+/**
+ * Middleware para validar dados de requisição usando Zod
+ * @param schema Schema Zod para validação
+ * @param target Onde procurar os dados ('json', 'form', 'query')
+ */
+export function validate<T extends z.ZodType>(
+  schema: T,
+  target: "json" | "form" | "query" = "json"
+): MiddlewareHandler {
+  return async (c: Context, next: Next) => {
     try {
-      const body = await ctx.request.body.json();
-      const errors: { [key: string]: string } = {};
-
-      for (const [field, validator] of Object.entries(schema)) {
-        const result = validator(body[field]);
-        if (typeof result === "string") {
-          errors[field] = result;
-        }
+      // Obter dados da fonte apropriada
+      let data;
+      if (target === "json") {
+        data = await c.req.json();
+      } else if (target === "form") {
+        data = await c.req.formData();
+      } else if (target === "query") {
+        data = Object.fromEntries(new URL(c.req.url).searchParams);
       }
 
-      if (Object.keys(errors).length > 0) {
-        ctx.response.status = 400;
-        ctx.response.body = { success: false, errors };
-        return;
+      // Validar dados
+      const result = schema.safeParse(data);
+
+      if (!result.success) {
+        return c.json({
+          success: false,
+          errors: result.error.format(),
+        }, 400);
       }
 
-      ctx.state.validatedData = body;
+      // Adicionar dados validados ao contexto
+      c.set("data", result.data);
       await next();
     } catch (error) {
-      ctx.response.status = 400;
-      ctx.response.body = { success: false, error: "Invalid request body" };
+      return c.json({
+        success: false,
+        message: "Invalid request format",
+      }, 400);
     }
   };
 }
 
-export const validators = {
-  required: (value: any) => {
-    return value !== undefined && value !== null && value !== ""
-      ? true
-      : "Field is required";
-  },
-  email: (value: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(value) ? true : "Invalid email format";
-  },
-  minLength: (length: number) => (value: string) => {
-    return value.length >= length
-      ? true
-      : `Must be at least ${length} characters`;
-  }
-};
+/**
+ * Middleware para validar parâmetros de URL
+ */
+export function validateParams<T extends z.ZodType>(schema: T): MiddlewareHandler {
+  return async (c: Context, next: Next) => {
+    const params = c.req.param();
+    const result = schema.safeParse(params);
+    
+    if (!result.success) {
+      return c.json({
+        success: false,
+        errors: result.error.format(),
+      }, 400);
+    }
+
+    c.set("params", result.data);
+    await next();
+  };
+}

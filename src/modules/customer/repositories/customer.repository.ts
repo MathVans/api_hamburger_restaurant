@@ -12,6 +12,7 @@ import type {
   address,
   customer,
   customerOrder,
+  CustomerWithRelations,
   newAddress,
   newCustomer,
   order,
@@ -20,16 +21,29 @@ import type {
 
 export class CustomerRepository {
   // CRUD básico para Customers
-  async findAll(): Promise<customer[]> {
-    return await db.select().from(customerTable);
+  async findAll(): Promise<CustomerWithRelations[]> {
+    return await db.query.customer.findMany({
+      with: {
+        role: true,
+        addresses: true,
+      },
+      columns: {
+        password: false,
+      },
+    });
   }
 
-  async findById(id: number): Promise<customer | undefined> {
-    const [result] = await db
-      .select()
-      .from(customerTable)
-      .where(eq(customerTable.id, id));
-    return result;
+  async findById(id: number): Promise<CustomerWithRelations | undefined> {
+    return await db.query.customer.findFirst({
+      where: eq(customerTable.id, id),
+      with: {
+        role: true,
+        addresses: true,
+      },
+      columns: {
+        password: false,
+      },
+    });
   }
 
   async create(data: newCustomer): Promise<customer> {

@@ -1,100 +1,77 @@
 import { Hono } from "hono";
 import { CustomerService } from "../services/customer.service.ts";
 import { CustomerRepository } from "../repositories/customer.repository.ts";
-import { zValidator } from "@hono/zod-validator";
+import { useValidation } from "../../shared/hooks/useValidation.ts";
 import {
-  addressCreateSchema,
   customerCreateSchema,
   customerUpdateSchema,
+  loginSchema,
+  toNewCustomer,
+  toUpdateCustomer,
 } from "../schemas/user.schema.ts";
 
-const customerController = new Hono();
 const customerService = new CustomerService(new CustomerRepository());
+const customerController = new Hono();
 
+// CREATE - Corrigido
+customerController.post("/", async (c) => {
+  const validate = useValidation(customerCreateSchema, toNewCustomer);
+  const [input, customerData] = await validate(c);
+
+  // Se validação falhou, o hook já definiu a resposta
+  if (!input) return;
+
+  // Prossegue com a criação usando dados já transformados
+  const customer = await customerService.createCustomer(customerData);
+  return c.json({ ...customer, password: undefined }, 201);
+});
+
+// UPDATE - Corrigido
+customerController.put("/:id", async (c) => {
+  const id = Number(c.req.param("id"));
+  if (isNaN(id)) {
+    return c.json({ error: "ID inválido" }, 400);
+  }
+
+  const validate = useValidation(customerUpdateSchema, toUpdateCustomer);
+  const [input, updateData] = await validate(c);
+
+  // Não retorna o contexto, retorna void (early return)
+  if (!input) return;
+
+  const customer = await customerService.updateCustomer(id, updateData);
+  if (!customer) {
+    return c.json({ error: "Cliente não encontrado" }, 404);
+  }
+
+  return c.json({ ...customer, password: undefined });
+});
+// GET ALL - Sem validação de corpo
 customerController.get("/", async (c) => {
   const customers = await customerService.getAllCustomers();
   return c.json(customers);
 });
 
+// GET ONE - Com validação de parâmetros
 customerController.get("/:id", async (c) => {
-  const id = parseInt(c.param("id"));
-  const customer = await customerService.getCustomerById(id);
+  const id = Number(c.req.param("id"));
+  if (isNaN(id)) return c.json({ error: "ID inválido" }, 400);
 
-  if (!customer) {
-    return c.json({ message: "Customer not found" }, 404);
-  }
+  const customer = await customerService.getCustomerById(id);
+  if (!customer) return c.json({ error: "Cliente não encontrado" }, 404);
 
   return c.json(customer);
 });
 
-customerController.post(
-  "/",
-  zValidator("json", customerCreateSchema),
-  async (c) => {
-    const data = c.req.valid("json");
-    const customer = await customerService.createCustomer(data);
-    return c.json(customer, 201);
-  },
-);
-
-customerController.put(
-  "/:id",
-  zValidator("json", customerUpdateSchema),
-  async (c) => {
-    const id = parseInt(c.param("id"));
-    const data = c.req.valid("json");
-
-    const customer = await customerService.updateCustomer(id, data);
-    if (!customer) {
-      return c.json({ message: "Customer not found" }, 404);
-    }
-
-    return c.json(customer);
-  },
-);
-
+// DELETE
 customerController.delete("/:id", async (c) => {
-  const id = parseInt(c.param("id"));
-  const result = await customerService.deleteCustomer(id);
-  return c.json({ success: result });
-});
+  const id = Number(c.req.param("id"));
+  if (isNaN(id)) return c.json({ error: "ID inválido" }, 400);
 
-// Address endpoints
-customerController.post(
-  "/:id/addresses",
-  zValidator("json", addressCreateSchema),
-  async (c) => {
-    const customerId = parseInt(c.param("id"));
-    const addressData = await c.req.json();
+  const deleted = await customerService.deleteCustomer(id);
+  if (!deleted) return c.json({ error: "Cliente não encontrado" }, 404);
 
-    const address = await customerService.addCustomerAddress(
-      customerId,
-      addressData,
-    );
-    return c.json(address, 201);
-  },
-);
-
-customerController.get("/:id/details", async (c) => {
-  const customerId = parseInt(c.param("id"));
-  const details = await customerService.getCustomerWithDetails(customerId);
-
-  if (!details) {
-    return c.json({ message: "Customer not found" }, 404);
-  }
-
-  return c.json(details);
-});
-
-customerController.get("/:id/profile", async (c) => {
-  const customerId = parseInt(c.param("id"));
-  const profile = await customerService.getCustomerProfileWithStats(customerId);
-
-  if (!profile) {
-    return c.json({ message: "Customer not found" }, 404);
-  }
-
-  return c.json(profile);
+  return c.json({ message: "Cliente excluído com sucesso" });
 });
 
 export default customerController;
